@@ -97,20 +97,31 @@ import {toggleMark, setBlockType, wrapIn} from "prosemirror-commands"
 	    			this.lastEle=false
 					this.removeFloatingMenu()	  
 	    			this.position--;
-
+	
 	    			if(this.position<1){
-						console.log('ashche')
 	    				this.position=1;
 	    				this.lastEle=true;
 						this.activeFloatingMenu({top:0,left:0})
 	    			}
-	    			return;
+					if(this.view.dom.querySelector(`*:nth-child(${this.position})`).textContent==''){
+						const top=this.view.dom.querySelector(`*:nth-child(${this.position})`).getBoundingClientRect().top;
+						const left=this.view.dom.querySelector(`*:nth-child(${this.position})`).getBoundingClientRect().left;
+						this.activeFloatingMenu({top,left})
+					}
+	    		    return
 			    }	
 
 	    	 	if(!view.dom.children[this.position-1]){
 	    	 		this.lastEle=false
 					this.removeFloatingMenu() 
-	    			this.position--;
+					this.position--;
+					
+					if(this.view.dom.querySelector(`*:nth-child(${this.position})`).textContent==''){
+						const top=this.view.dom.querySelector(`*:nth-child(${this.position})`).getBoundingClientRect().top;
+						const left=this.view.dom.querySelector(`*:nth-child(${this.position})`).getBoundingClientRect().left;
+						this.activeFloatingMenu({top,left})
+					}
+					
 	    			return;
 	    	 	}
 
@@ -225,8 +236,7 @@ import {toggleMark, setBlockType, wrapIn} from "prosemirror-commands"
 	  }
 
 	  destroy() { 
-	  	this.floatingToolBar.remove()
-	    this.dom.remove()
+	    this.dom.wrapper()
 	  }
 	}
 
@@ -263,22 +273,11 @@ import {toggleMark, setBlockType, wrapIn} from "prosemirror-commands"
 
 	})
 
-	let clickPlugin = new Plugin({
-	  props: {
-	  handleClickOn(view, pos, node, nodePos, event, direct){
-	      console.log(view, pos, node, nodePos, event, direct)
-	     const {top,left}=view.coordsAtPos(pos);
-console.log(top,left)
-	      console.log("A button was pressed!")     
-	    }
-	  }
-	})
-
 
 	let view  = new EditorView(document.querySelector("#editor"), {
 	  state: EditorState.create({
 	    doc: DOMParser.fromSchema(mySchema).parse(document.querySelector("#content")),
-	    plugins: exampleSetup({schema: mySchema}).concat(floatingMenuPlugin).concat(clickPlugin)
+	    plugins: exampleSetup({schema: mySchema}).concat(floatingMenuPlugin)
 	  })
 	})
 
